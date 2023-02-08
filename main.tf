@@ -43,30 +43,6 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
 
-# Use data block to query an existing resource in AWS
-data "aws_s3_bucket" "data_bucket" {
-  bucket = "my-data-lookup-bucket-ollie"
-}
-
-# Create IAM Policy to grant access to the bucket
-resource "aws_iam_policy" "policy" {
-  name        = "data_bucket_policy"
-  description = "Deny access to my bucket"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "s3:Get*",
-          "s3:List*"
-        ],
-        "Resource" : "${data.aws_s3_bucket.data_bucket.arn}"
-      }
-    ]
-  })
-}
-
 #Define the VPC
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
