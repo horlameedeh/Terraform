@@ -43,30 +43,6 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
 
-# Use data block to query an existing resource in AWS
-data "aws_s3_bucket" "data_bucket" {
-  bucket = "my-data-lookup-bucket-ollie"
-}
-
-# Create IAM Policy to grant access to the bucket
-resource "aws_iam_policy" "policy" {
-  name        = "data_bucket_policy"
-  description = "Deny access to my bucket"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "s3:Get*",
-          "s3:List*"
-        ],
-        "Resource" : "${data.aws_s3_bucket.data_bucket.arn}"
-      }
-    ]
-  })
-}
-
 #Define the VPC
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
@@ -239,37 +215,6 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
   owners = ["099720109477"]
-}
-
-# Terraform Resource Block - To Build EC2 instance in Public Subnet
-resource "aws_instance" "ubuntu_server" {
-  ami             = data.aws_ami.ubuntu.id
-  instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.public_subnets["public_subnet_1"].id
-  security_groups = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
-  key_name        = aws_key_pair.generated.key_name
-  connection {
-    user        = "ubuntu"
-    private_key = tls_private_key.generated.private_key_pem
-    host        = self.public_ip
-  }
-
-  associate_public_ip_address = true
-  tags = {
-    Name = "Web EC2 Server"
-  }
-
-  provisioner "local-exec" {
-    command = "chmod 600 ${local_file.private_key_pem.filename}"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "git clone https://github.com/hashicorp/demo-terraform-101",
-      "cp -a demo-terraform-101/. /tmp/",
-      "sudo sh /tmp/assets/setup-web.sh",
-    ]
-  }
 }
 
 resource "random_id" "randomness" {
