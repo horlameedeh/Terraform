@@ -16,7 +16,7 @@ most common steps necessary to work in a collaborative nature, but it
 also requires that you host the Terraform code in a VCS repository.
 Events on the repository will trigger workflows on Terraform Cloud. For
 instance, a commit to the default branch could kick off a plan and
-apply workflow in Terraform Cloud.
+apply workflow in Terraform Cloud
 
 ## Master Terraform by taking a Hands-On Approach
 
